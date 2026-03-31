@@ -1,22 +1,34 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: EduEarn Student Productivity & Earning API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: tasks
+    description: Task management
+  - name: users
+    description: User operations
+  - name: leaderboard
+    description: Leaderboard operations
+  - name: notifications
+    description: Notification operations
+  - name: challenges
+    description: Daily challenge operations
+  - name: dashboard
+    description: Dashboard summary
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +36,310 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks:
+    get:
+      operationId: getTasks
+      tags: [tasks]
+      summary: Get all tasks
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [study, gig, challenge]
+        - name: completed
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+  /tasks/{id}/complete:
+    post:
+      operationId: completeTask
+      tags: [tasks]
+      summary: Mark a task as completed
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskCompletionResult"
+        "400":
+          description: Task already completed or error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/profile:
+    get:
+      operationId: getProfile
+      tags: [users]
+      summary: Get user profile with stats
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/completed-tasks:
+    get:
+      operationId: getCompletedTasks
+      tags: [users]
+      summary: Get user completed tasks history
+      responses:
+        "200":
+          description: Completed tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompletedTask"
+
+  /users/checkin:
+    post:
+      operationId: dailyCheckin
+      tags: [users]
+      summary: Daily check-in to update streak
+      responses:
+        "200":
+          description: Check-in result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckinResult"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [leaderboard]
+      summary: Get leaderboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [weekly, alltime]
+            default: weekly
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: Get user notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: All marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /challenges/today:
+    get:
+      operationId: getTodayChallenge
+      tags: [challenges]
+      summary: Get today's daily challenge
+      responses:
+        "200":
+          description: Today's challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyChallenge"
+
+  /challenges/{id}/complete:
+    post:
+      operationId: completeChallenge
+      tags: [challenges]
+      summary: Complete today's daily challenge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Challenge completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskCompletionResult"
+        "400":
+          description: Already completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +350,329 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - password
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        points:
+          type: integer
+        streak:
+          type: integer
+        lastCheckin:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - points
+        - streak
+        - createdAt
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        message:
+          type: string
+      required:
+        - user
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+          enum: [study, gig, challenge]
+        reward:
+          type: integer
+        points:
+          type: integer
+        completed:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - category
+        - reward
+        - points
+        - completed
+        - createdAt
+
+    TaskCompletionResult:
+      type: object
+      properties:
+        task:
+          $ref: "#/components/schemas/Task"
+        pointsEarned:
+          type: integer
+        rewardEarned:
+          type: integer
+        newTotalPoints:
+          type: integer
+        message:
+          type: string
+      required:
+        - task
+        - pointsEarned
+        - rewardEarned
+        - newTotalPoints
+        - message
+
+    CompletedTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: integer
+        taskTitle:
+          type: string
+        category:
+          type: string
+        reward:
+          type: integer
+        points:
+          type: integer
+        completedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - taskId
+        - taskTitle
+        - category
+        - reward
+        - points
+        - completedAt
+
+    UserProfile:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        totalTasksCompleted:
+          type: integer
+        totalRewardsEarned:
+          type: integer
+        rank:
+          type: integer
+        weeklyPoints:
+          type: integer
+      required:
+        - user
+        - totalTasksCompleted
+        - totalRewardsEarned
+        - rank
+        - weeklyPoints
+
+    CheckinResult:
+      type: object
+      properties:
+        streak:
+          type: integer
+        message:
+          type: string
+        isNewDay:
+          type: boolean
+      required:
+        - streak
+        - message
+        - isNewDay
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        points:
+          type: integer
+        streak:
+          type: integer
+        tasksCompleted:
+          type: integer
+        isCurrentUser:
+          type: boolean
+      required:
+        - rank
+        - userId
+        - name
+        - points
+        - streak
+        - tasksCompleted
+        - isCurrentUser
+
+    LeaderboardResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+        currentUserRank:
+          type: integer
+          nullable: true
+        period:
+          type: string
+      required:
+        - entries
+        - period
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [task_available, reward_earned, streak_milestone, challenge_available, rank_change]
+        title:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - title
+        - message
+        - read
+        - createdAt
+
+    DailyChallenge:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        reward:
+          type: integer
+        bonusReward:
+          type: integer
+        points:
+          type: integer
+        bonusPoints:
+          type: integer
+        completed:
+          type: boolean
+        date:
+          type: string
+      required:
+        - id
+        - title
+        - reward
+        - bonusReward
+        - points
+        - bonusPoints
+        - completed
+        - date
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalPoints:
+          type: integer
+        currentStreak:
+          type: integer
+        tasksCompletedToday:
+          type: integer
+        pendingTasks:
+          type: integer
+        totalRewardsEarned:
+          type: integer
+        weeklyRank:
+          type: integer
+          nullable: true
+        challengeCompleted:
+          type: boolean
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompletedTask"
+      required:
+        - totalPoints
+        - currentStreak
+        - tasksCompletedToday
+        - pendingTasks
+        - totalRewardsEarned
+        - challengeCompleted
+        - recentActivity
