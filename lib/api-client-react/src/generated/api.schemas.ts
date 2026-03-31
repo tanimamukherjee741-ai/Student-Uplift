@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
@@ -18,10 +18,20 @@ export interface SuccessResponse {
   message?: string;
 }
 
+export type RegisterRequestRole =
+  (typeof RegisterRequestRole)[keyof typeof RegisterRequestRole];
+
+export const RegisterRequestRole = {
+  student: "student",
+  teacher: "teacher",
+  employer: "employer",
+} as const;
+
 export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  role?: RegisterRequestRole;
 }
 
 export interface LoginRequest {
@@ -29,12 +39,23 @@ export interface LoginRequest {
   password: string;
 }
 
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export const UserRole = {
+  student: "student",
+  teacher: "teacher",
+  employer: "employer",
+} as const;
+
 export interface User {
   id: number;
   name: string;
   email: string;
+  role: UserRole;
   points: number;
   streak: number;
+  stream?: string | null;
+  city?: string | null;
   lastCheckin?: string | null;
   createdAt: string;
 }
@@ -88,12 +109,17 @@ export interface UserProfile {
   totalRewardsEarned: number;
   rank: number;
   weeklyPoints: number;
+  totalStudyMinutesToday: number;
 }
 
 export interface CheckinResult {
   streak: number;
   message: string;
   isNewDay: boolean;
+}
+
+export interface JoinStreamRequest {
+  stream: string;
 }
 
 export interface LeaderboardEntry {
@@ -110,6 +136,12 @@ export interface LeaderboardResponse {
   entries: LeaderboardEntry[];
   currentUserRank?: number | null;
   period: string;
+}
+
+export interface StreamLeaderboardResponse {
+  stream?: string | null;
+  entries: LeaderboardEntry[];
+  currentUserRank?: number | null;
 }
 
 export type NotificationType =
@@ -153,6 +185,140 @@ export interface DashboardSummary {
   weeklyRank?: number | null;
   challengeCompleted: boolean;
   recentActivity: CompletedTask[];
+  studyMinutesToday: number;
+  streamName?: string | null;
+}
+
+export type TutorListingMode =
+  (typeof TutorListingMode)[keyof typeof TutorListingMode];
+
+export const TutorListingMode = {
+  online: "online",
+  offline: "offline",
+  both: "both",
+} as const;
+
+export interface TutorListing {
+  id: number;
+  teacherId: number;
+  teacherName: string;
+  subject: string;
+  description?: string | null;
+  fees: number;
+  feesLabel: string;
+  city: string;
+  contactEmail: string;
+  contactPhone?: string | null;
+  mode: TutorListingMode;
+  createdAt: string;
+}
+
+export type CreateTutorListingRequestMode =
+  (typeof CreateTutorListingRequestMode)[keyof typeof CreateTutorListingRequestMode];
+
+export const CreateTutorListingRequestMode = {
+  online: "online",
+  offline: "offline",
+  both: "both",
+} as const;
+
+export interface CreateTutorListingRequest {
+  subject: string;
+  description?: string;
+  fees: number;
+  feesLabel: string;
+  city: string;
+  contactEmail: string;
+  contactPhone?: string;
+  mode: CreateTutorListingRequestMode;
+}
+
+export type InternshipListingType =
+  (typeof InternshipListingType)[keyof typeof InternshipListingType];
+
+export const InternshipListingType = {
+  internship: "internship",
+  part_time: "part_time",
+  freelance: "freelance",
+} as const;
+
+export interface InternshipListing {
+  id: number;
+  employerId: number;
+  employerName: string;
+  title: string;
+  description: string;
+  type: InternshipListingType;
+  payment: number;
+  paymentLabel: string;
+  location: string;
+  applyLink?: string | null;
+  applyEmail?: string | null;
+  skills?: string | null;
+  createdAt: string;
+}
+
+export type CreateInternshipListingRequestType =
+  (typeof CreateInternshipListingRequestType)[keyof typeof CreateInternshipListingRequestType];
+
+export const CreateInternshipListingRequestType = {
+  internship: "internship",
+  part_time: "part_time",
+  freelance: "freelance",
+} as const;
+
+export interface CreateInternshipListingRequest {
+  title: string;
+  description: string;
+  type: CreateInternshipListingRequestType;
+  payment: number;
+  paymentLabel: string;
+  location: string;
+  applyLink?: string;
+  applyEmail?: string;
+  skills?: string;
+}
+
+export interface StreamInfo {
+  stream: string;
+  memberCount: number;
+  isJoined: boolean;
+}
+
+export interface StreamMember {
+  userId: number;
+  name: string;
+  points: number;
+  streak: number;
+  tasksCompleted: number;
+  isCurrentUser: boolean;
+}
+
+export interface LogStudySessionRequest {
+  durationSeconds: number;
+  date?: string;
+}
+
+export interface StudySessionResult {
+  sessionMinutes: number;
+  totalMinutesToday: number;
+  goalMinutes: number;
+  message: string;
+  goalReached: boolean;
+}
+
+export interface TodayStudyStats {
+  totalSeconds: number;
+  totalMinutes: number;
+  goalMinutes: number;
+  goalReached: boolean;
+  sessionsCount: number;
+}
+
+export interface StudyDaySummary {
+  date: string;
+  totalMinutes: number;
+  sessionsCount: number;
 }
 
 export type GetTasksParams = {
@@ -179,4 +345,23 @@ export type GetLeaderboardPeriod =
 export const GetLeaderboardPeriod = {
   weekly: "weekly",
   alltime: "alltime",
+} as const;
+
+export type GetTutorsParams = {
+  city?: string;
+  subject?: string;
+};
+
+export type GetInternshipsParams = {
+  type?: GetInternshipsType;
+  location?: string;
+};
+
+export type GetInternshipsType =
+  (typeof GetInternshipsType)[keyof typeof GetInternshipsType];
+
+export const GetInternshipsType = {
+  internship: "internship",
+  part_time: "part_time",
+  freelance: "freelance",
 } as const;

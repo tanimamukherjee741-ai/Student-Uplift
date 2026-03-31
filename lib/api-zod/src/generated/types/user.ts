@@ -3,15 +3,19 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { UserRole } from "./userRole";
 
 export interface User {
   id: number;
   name: string;
   email: string;
+  role: UserRole;
   points: number;
   streak: number;
+  stream?: string | null;
+  city?: string | null;
   lastCheckin?: Date | null;
   createdAt: Date;
 }

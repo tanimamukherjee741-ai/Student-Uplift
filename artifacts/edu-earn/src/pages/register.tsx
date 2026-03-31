@@ -15,12 +15,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Trophy, ArrowLeft } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.enum(["student", "teacher", "employer"]).default("student"),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -44,6 +46,7 @@ export default function Register() {
       name: "",
       email: "",
       password: "",
+      role: "student",
     },
   });
 
@@ -75,17 +78,53 @@ export default function Register() {
         <ArrowLeft className="w-4 h-4" /> Back home
       </Link>
       
-      <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+      <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-sm border border-slate-100 mt-12 mb-12">
         <div className="flex flex-col items-center mb-8">
           <div className="bg-primary text-white p-2 rounded-xl shadow-sm mb-4">
             <Trophy className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create your account</h1>
-          <p className="text-slate-500 mt-1">Start earning rewards today</p>
+          <p className="text-slate-500 mt-1">Join the community</p>
         </div>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel className="font-semibold text-slate-700">I am a...</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-2"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0 p-3 border border-slate-200 rounded-xl bg-slate-50/50">
+                        <FormControl>
+                          <RadioGroupItem value="student" />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer flex-1">Student</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0 p-3 border border-slate-200 rounded-xl bg-slate-50/50">
+                        <FormControl>
+                          <RadioGroupItem value="teacher" />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer flex-1">Teacher / Tutor</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0 p-3 border border-slate-200 rounded-xl bg-slate-50/50">
+                        <FormControl>
+                          <RadioGroupItem value="employer" />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer flex-1">Employer / Company</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"

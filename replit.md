@@ -1,111 +1,92 @@
-# Workspace
+# EduEarn — Student Productivity & Earning Platform
 
 ## Overview
+Full-featured student productivity web app where students complete study tasks and small gigs to earn rupee rewards (₹). Features gamification (streaks, leaderboard, daily challenges), a study time tracker, tutor finder, internship board, and a class stream competition system.
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+## Architecture
 
-## Stack
+- **Frontend**: React + Vite (`artifacts/edu-earn`) — port from `PORT` env var
+- **Backend**: Express.js API server (`artifacts/api-server`) — port 8080
+- **Database**: PostgreSQL via Drizzle ORM (`lib/db`)
+- **API Contract**: OpenAPI spec in `lib/api-spec/openapi.yaml`; React Query hooks generated via Orval into `lib/api-client-react`
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
-- **Auth**: Session-based auth with express-session + bcryptjs
-- **Frontend**: React + Vite + TanStack Query + wouter routing + Tailwind CSS
+## User Roles
+- `student` — default, can complete tasks/challenges, track study time, join streams
+- `teacher` — can post tutor listings (visible on /find-tutors)
+- `employer` — can post internship/job listings (visible on /internships)
 
-## Structure
+## Pages & Routes
 
-```text
-artifacts-monorepo/
-├── artifacts/
-│   ├── api-server/         # Express API server
-│   └── edu-earn/           # EduEarn React frontend
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts
-├── pnpm-workspace.yaml
-├── tsconfig.base.json
-├── tsconfig.json
-└── package.json
-```
-
-## Application: EduEarn
-
-A student productivity and earning website with:
-- User authentication (register/login with email+password)
-- Dashboard with daily tasks, earning gigs, progress stats
-- Task system with ₹ rewards and point tracking (18 tasks seeded)
-- Daily challenge feature with bonus rewards (14 challenges seeded)
-- Streak system tracking consecutive daily logins
-- Weekly & all-time leaderboard
-- Profile page with history
-- Notification system (toast alerts + notification bell)
-- Responsive design with indigo/violet + gold color palette
+| Route | Description | Auth Required |
+|-------|-------------|---------------|
+| `/` | Landing page | No |
+| `/login` | Login | No |
+| `/register` | Register (with role selector) | No |
+| `/dashboard` | Student dashboard with summary stats | Yes |
+| `/tasks` | Task list with earn ₹ | Yes |
+| `/leaderboard` | Global + stream leaderboard | Yes |
+| `/profile` | User profile with stats | Yes |
+| `/find-tutors` | Tutor & coaching finder (search by city/subject) | Yes |
+| `/internships` | Internships, part-time, freelance listings | Yes |
+| `/study-tracker` | Study timer + 7-day history chart | Yes |
+| `/streams` | Join class stream, see classmates leaderboard | Yes |
+| `/teacher-dashboard` | Post/manage tutor or internship listings | Yes (teacher/employer) |
 
 ## Database Schema
 
-- `users` — id, name, email, password_hash, points, streak, last_checkin
-- `tasks` — id, title, description, category (study|gig|challenge), reward, points, is_active
-- `user_tasks` — junction: user task completions
-- `challenges` — daily challenge with reward, bonus_reward, points, bonus_points, date
-- `user_challenges` — junction: user challenge completions
-- `notifications` — user notifications with type, title, message, read
+Tables in `lib/db/src/schema/`:
+- `users` — id, name, email, passwordHash, role, points, streak, stream, city, lastCheckin, createdAt
+- `tasks` — tasks with points and ₹ rewards
+- `user_tasks` — task completion records
+- `challenges` — daily challenges
+- `user_challenges` — challenge completion records
+- `notifications` — user notifications
+- `tutor_listings` — tutor/coaching listings posted by teachers
+- `internship_listings` — internship/job listings posted by employers
+- `study_sessions` — study timer session logs
 
 ## API Routes
 
-All routes are under `/api`:
-- `GET /healthz` — health check
-- `POST /auth/register` — create account
-- `POST /auth/login` — login
-- `POST /auth/logout` — logout
-- `GET /auth/me` — current user
-- `GET /tasks?category=` — list tasks with completion status
-- `POST /tasks/:id/complete` — complete a task
-- `GET /users/profile` — profile with stats
-- `GET /users/completed-tasks` — task history
-- `POST /users/checkin` — daily check-in / streak update
-- `GET /leaderboard?period=weekly|alltime` — leaderboard
-- `GET /notifications` — user notifications
-- `POST /notifications/:id/read` — mark read
-- `POST /notifications/read-all` — mark all read
-- `GET /challenges/today` — today's challenge
-- `POST /challenges/:id/complete` — complete challenge
-- `GET /dashboard/summary` — dashboard stats
+Backend routes in `artifacts/api-server/src/routes/`:
+- `auth.ts` — /auth/register, /auth/login, /auth/logout, /auth/me (role-aware)
+- `tasks.ts` — /tasks, /tasks/:id/complete
+- `users.ts` — /users/profile, /users/completed-tasks, /users/checkin
+- `leaderboard.ts` — /leaderboard
+- `notifications.ts` — /notifications, /notifications/:id/read, /notifications/read-all
+- `challenges.ts` — /challenges/today, /challenges/:id/complete
+- `dashboard.ts` — /dashboard/summary (includes study minutes + stream name)
+- `tutors.ts` — GET /tutors, POST /tutors, DELETE /tutors/:id, GET /tutors/my-listings
+- `internships.ts` — GET /internships, POST /internships, DELETE /internships/:id, GET /internships/my-listings
+- `streams.ts` — GET /streams, POST /users/join-stream, GET /streams/:stream/members, GET /leaderboard/stream
+- `study.ts` — POST /study/sessions, GET /study/today, GET /study/history
 
-## TypeScript & Composite Projects
+## Key Technical Decisions
+- `bcryptjs` (pure JS) for password hashing (avoids native build issues)
+- `express-session` with 7-day cookie
+- Orval codegen for React Query hooks from OpenAPI spec
+- Recharts for study history bar chart
+- Daily study goal: 120 minutes (2 hours)
+- Google Fonts `@import` must be FIRST line in index.css
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references.
+## Seed Data
+- 18 tasks (study + gig categories)
+- 14 daily challenges
+- 6 tutor listings
+- 6 internship listings
+- Sample teacher account: teacher@eduearn.in / password123
+- Sample employer account: employer@eduearn.in / password123
 
-## Packages
+## Development Commands
+```bash
+# Start API server
+pnpm --filter @workspace/api-server run dev
 
-### `artifacts/api-server` (`@workspace/api-server`)
+# Start frontend
+pnpm --filter @workspace/edu-earn run dev
 
-Express 5 API server with session-based auth, bcryptjs, express-session.
+# Push DB schema changes
+pnpm --filter @workspace/db run push
 
-### `artifacts/edu-earn` (`@workspace/edu-earn`)
-
-React + Vite frontend with Plus Jakarta Sans font, indigo/violet + gold palette.
-
-### `lib/db` (`@workspace/db`)
-
-Database layer using Drizzle ORM with PostgreSQL.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-OpenAPI spec and Orval codegen config.
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks.
+# Regenerate API hooks from OpenAPI spec
+pnpm --filter @workspace/api-spec run codegen
+```

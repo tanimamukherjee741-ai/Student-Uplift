@@ -3,11 +3,13 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
+import type { RegisterRequestRole } from "./registerRequestRole";
 
 export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  role?: RegisterRequestRole;
 }

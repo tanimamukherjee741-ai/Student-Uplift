@@ -11,6 +11,11 @@ import Tasks from "@/pages/tasks";
 import Leaderboard from "@/pages/leaderboard";
 import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
+import FindTutors from "@/pages/find-tutors";
+import Internships from "@/pages/internships";
+import StudyTracker from "@/pages/study-tracker";
+import Streams from "@/pages/streams";
+import TeacherDashboard from "@/pages/teacher-dashboard";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +29,11 @@ function Router() {
       <Route path="/tasks" component={Tasks} />
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/profile" component={Profile} />
+      <Route path="/find-tutors" component={FindTutors} />
+      <Route path="/internships" component={Internships} />
+      <Route path="/study-tracker" component={StudyTracker} />
+      <Route path="/streams" component={Streams} />
+      <Route path="/teacher-dashboard" component={TeacherDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

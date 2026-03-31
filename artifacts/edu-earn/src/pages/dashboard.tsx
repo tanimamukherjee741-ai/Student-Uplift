@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Flame, Target, CheckCircle2, IndianRupee, Clock, ArrowRight, Zap, BookOpen, Briefcase } from "lucide-react";
+import { Trophy, Flame, Target, CheckCircle2, IndianRupee, Clock, ArrowRight, Zap, BookOpen, Briefcase, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
@@ -168,6 +168,47 @@ export default function Dashboard() {
                   )}
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link href="/study-tracker">
+                <Card className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer border-none shadow-md h-full">
+                  <CardContent className="p-6 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-lg">Study Timer</h3>
+                      <p className="text-primary-foreground/80 text-sm mt-1">Start tracking your focus</p>
+                    </div>
+                    <Clock className="w-8 h-8 opacity-80" />
+                  </CardContent>
+                </Card>
+              </Link>
+
+              {summary?.streamName ? (
+                <Link href="/streams">
+                  <Card className="bg-white border-border hover:shadow-md transition-shadow cursor-pointer h-full">
+                    <CardContent className="p-6 flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg text-foreground">Your Stream</h3>
+                        <p className="text-muted-foreground text-sm mt-1">{summary.streamName}</p>
+                      </div>
+                      <Users className="w-8 h-8 text-primary opacity-80" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              ) : (
+                <Link href="/streams">
+                  <Card className="bg-white border-border hover:shadow-md transition-shadow cursor-pointer border-dashed h-full">
+                    <CardContent className="p-6 flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg text-foreground">Join a Stream</h3>
+                        <p className="text-muted-foreground text-sm mt-1">Find your classmates</p>
+                      </div>
+                      <Users className="w-8 h-8 text-muted-foreground opacity-50" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              )}
             </div>
 
             {/* Tasks List */}

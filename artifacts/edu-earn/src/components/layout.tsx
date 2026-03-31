@@ -19,7 +19,11 @@ import {
   Flame,
   LogOut,
   Menu,
-  CheckCircle2
+  CheckCircle2,
+  Clock,
+  Users,
+  Search,
+  Briefcase
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,8 +91,17 @@ export function Layout({ children }: LayoutProps) {
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/tasks", label: "Tasks & Gigs", icon: CheckSquare },
-    { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+    ...(user?.role === 'student' ? [
+      { href: "/tasks", label: "Tasks & Gigs", icon: CheckSquare },
+      { href: "/study-tracker", label: "Study Tracker", icon: Clock },
+      { href: "/streams", label: "Study Partners", icon: Users },
+      { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+    ] : []),
+    { href: "/find-tutors", label: "Find Tutors", icon: Search },
+    { href: "/internships", label: "Internships", icon: Briefcase },
+    ...(user?.role === 'teacher' || user?.role === 'employer' ? [
+      { href: "/teacher-dashboard", label: "My Dashboard", icon: LayoutDashboard },
+    ] : []),
     { href: "/profile", label: "Profile", icon: UserIcon },
   ];
 

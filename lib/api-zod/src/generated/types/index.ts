@@ -3,29 +3,50 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from "./authResponse";
 export * from "./checkinResult";
 export * from "./completedTask";
+export * from "./createInternshipListingRequest";
+export * from "./createInternshipListingRequestType";
+export * from "./createTutorListingRequest";
+export * from "./createTutorListingRequestMode";
 export * from "./dailyChallenge";
 export * from "./dashboardSummary";
 export * from "./errorResponse";
+export * from "./getInternshipsParams";
+export * from "./getInternshipsType";
 export * from "./getLeaderboardParams";
 export * from "./getLeaderboardPeriod";
 export * from "./getTasksCategory";
 export * from "./getTasksParams";
+export * from "./getTutorsParams";
 export * from "./healthStatus";
+export * from "./internshipListing";
+export * from "./internshipListingType";
+export * from "./joinStreamRequest";
 export * from "./leaderboardEntry";
 export * from "./leaderboardResponse";
 export * from "./loginRequest";
+export * from "./logStudySessionRequest";
 export * from "./notification";
 export * from "./notificationType";
 export * from "./registerRequest";
+export * from "./registerRequestRole";
+export * from "./streamInfo";
+export * from "./streamLeaderboardResponse";
+export * from "./streamMember";
+export * from "./studyDaySummary";
+export * from "./studySessionResult";
 export * from "./successResponse";
 export * from "./task";
 export * from "./taskCategory";
 export * from "./taskCompletionResult";
+export * from "./todayStudyStats";
+export * from "./tutorListing";
+export * from "./tutorListingMode";
 export * from "./user";
 export * from "./userProfile";
+export * from "./userRole";

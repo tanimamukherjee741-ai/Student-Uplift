@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { CompletedTask } from "./completedTask";
 
@@ -16,4 +16,6 @@ export interface DashboardSummary {
   weeklyRank?: number | null;
   challengeCompleted: boolean;
   recentActivity: CompletedTask[];
+  studyMinutesToday: number;
+  streamName?: string | null;
 }

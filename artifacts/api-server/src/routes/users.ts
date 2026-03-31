@@ -7,6 +7,7 @@ import {
   userChallengesTable,
   challengesTable,
   notificationsTable,
+  studySessionsTable,
 } from "@workspace/db/schema";
 import { eq, and, sql, desc, gte } from "drizzle-orm";
 
@@ -95,13 +96,25 @@ router.get("/users/profile", requireAuth, async (req, res) => {
 
   const weeklyPoints = Number(weeklyTaskPoints[0]?.totalPoints ?? 0);
 
+  // Study minutes today
+  const todayStr = new Date().toISOString().split("T")[0];
+  const studyResult = await db
+    .select({ total: sql<number>`COALESCE(sum(${studySessionsTable.durationSeconds}), 0)` })
+    .from(studySessionsTable)
+    .where(and(eq(studySessionsTable.userId, userId), eq(studySessionsTable.sessionDate, todayStr)));
+
+  const studyMinutesToday = Math.floor(Number(studyResult[0]?.total ?? 0) / 60);
+
   res.json({
     user: {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
       points: user.points,
       streak: user.streak,
+      stream: user.stream,
+      city: user.city,
       lastCheckin: user.lastCheckin,
       createdAt: user.createdAt,
     },
@@ -109,6 +122,7 @@ router.get("/users/profile", requireAuth, async (req, res) => {
     totalRewardsEarned,
     rank,
     weeklyPoints,
+    studyMinutesToday,
   });
 });
 

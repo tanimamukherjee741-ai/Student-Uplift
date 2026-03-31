@@ -1,9 +1,10 @@
-import { useGetProfile, getGetProfileQueryKey, useGetCompletedTasks, getGetCompletedTasksQueryKey } from "@workspace/api-client-react";
+import { useGetProfile, getGetProfileQueryKey, useGetCompletedTasks, getGetCompletedTasksQueryKey, useGetTodayStudyStats, getGetTodayStudyStatsQueryKey } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Flame, Target, IndianRupee, Mail, Calendar, CheckCircle2, Award } from "lucide-react";
+import { Trophy, Flame, Target, IndianRupee, Mail, Calendar, CheckCircle2, Award, Clock, Users } from "lucide-react";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 export default function Profile() {
   const { data: profile, isLoading: isProfileLoading } = useGetProfile({
@@ -12,6 +13,10 @@ export default function Profile() {
 
   const { data: history, isLoading: isHistoryLoading } = useGetCompletedTasks({
     query: { queryKey: getGetCompletedTasksQueryKey() }
+  });
+
+  const { data: todayStats, isLoading: isStatsLoading } = useGetTodayStudyStats({
+    query: { queryKey: getGetTodayStudyStatsQueryKey() }
   });
 
   return (
@@ -52,12 +57,20 @@ export default function Profile() {
                 <Flame className="w-5 h-5 text-orange-600 fill-orange-600" />
                 <span className="font-bold text-orange-800">{profile?.user.streak || 0} Day Streak</span>
               </div>
+              {profile?.user.role === 'student' && (
+                <Link href="/streams">
+                  <div className="bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    <span className="font-bold text-blue-800">{profile?.user.stream || 'Join Stream'}</span>
+                  </div>
+                </Link>
+              )}
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
           <Card className="bg-white border-border shadow-sm">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
@@ -87,9 +100,21 @@ export default function Profile() {
               <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="text-sm font-bold text-muted-foreground mb-1 uppercase tracking-wider">Tasks Completed</div>
+              <div className="text-sm font-bold text-muted-foreground mb-1 uppercase tracking-wider">Tasks Done</div>
               <div className="text-3xl font-extrabold text-foreground">
                 {isProfileLoading ? <Skeleton className="h-8 w-24 mx-auto" /> : profile?.totalTasksCompleted}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-border shadow-sm">
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                <Clock className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="text-sm font-bold text-muted-foreground mb-1 uppercase tracking-wider">Study Today</div>
+              <div className="text-3xl font-extrabold text-foreground">
+                {isStatsLoading ? <Skeleton className="h-8 w-24 mx-auto" /> : `${todayStats?.totalMinutes || 0}m`}
               </div>
             </CardContent>
           </Card>

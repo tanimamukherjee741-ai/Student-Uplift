@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { User } from "./user";
 
@@ -13,4 +13,5 @@ export interface UserProfile {
   totalRewardsEarned: number;
   rank: number;
   weeklyPoints: number;
+  totalStudyMinutesToday: number;
 }

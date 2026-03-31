@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * EduEarn Student Productivity & Earning API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from "zod";
 
@@ -17,10 +17,15 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary Register a new user
  */
+export const registerBodyRoleDefault = `student`;
+
 export const RegisterBody = zod.object({
   name: zod.string(),
   email: zod.string(),
   password: zod.string(),
+  role: zod
+    .enum(["student", "teacher", "employer"])
+    .default(registerBodyRoleDefault),
 });
 
 /**
@@ -36,8 +41,11 @@ export const LoginResponse = zod.object({
     id: zod.number(),
     name: zod.string(),
     email: zod.string(),
+    role: zod.enum(["student", "teacher", "employer"]),
     points: zod.number(),
     streak: zod.number(),
+    stream: zod.string().nullish(),
+    city: zod.string().nullish(),
     lastCheckin: zod.coerce.date().nullish(),
     createdAt: zod.coerce.date(),
   }),
@@ -59,8 +67,11 @@ export const GetMeResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
   email: zod.string(),
+  role: zod.enum(["student", "teacher", "employer"]),
   points: zod.number(),
   streak: zod.number(),
+  stream: zod.string().nullish(),
+  city: zod.string().nullish(),
   lastCheckin: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
 });
@@ -119,8 +130,11 @@ export const GetProfileResponse = zod.object({
     id: zod.number(),
     name: zod.string(),
     email: zod.string(),
+    role: zod.enum(["student", "teacher", "employer"]),
     points: zod.number(),
     streak: zod.number(),
+    stream: zod.string().nullish(),
+    city: zod.string().nullish(),
     lastCheckin: zod.coerce.date().nullish(),
     createdAt: zod.coerce.date(),
   }),
@@ -128,6 +142,7 @@ export const GetProfileResponse = zod.object({
   totalRewardsEarned: zod.number(),
   rank: zod.number(),
   weeklyPoints: zod.number(),
+  totalStudyMinutesToday: zod.number(),
 });
 
 /**
@@ -156,6 +171,18 @@ export const DailyCheckinResponse = zod.object({
 });
 
 /**
+ * @summary Join a class stream
+ */
+export const JoinStreamBody = zod.object({
+  stream: zod.string(),
+});
+
+export const JoinStreamResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+/**
  * @summary Get leaderboard
  */
 export const getLeaderboardQueryPeriodDefault = `weekly`;
@@ -180,6 +207,25 @@ export const GetLeaderboardResponse = zod.object({
   ),
   currentUserRank: zod.number().nullish(),
   period: zod.string(),
+});
+
+/**
+ * @summary Get leaderboard for current user's stream
+ */
+export const GetStreamLeaderboardResponse = zod.object({
+  stream: zod.string().nullish(),
+  entries: zod.array(
+    zod.object({
+      rank: zod.number(),
+      userId: zod.number(),
+      name: zod.string(),
+      points: zod.number(),
+      streak: zod.number(),
+      tasksCompleted: zod.number(),
+      isCurrentUser: zod.boolean(),
+    }),
+  ),
+  currentUserRank: zod.number().nullish(),
 });
 
 /**
@@ -283,4 +329,207 @@ export const GetDashboardSummaryResponse = zod.object({
       completedAt: zod.coerce.date(),
     }),
   ),
+  studyMinutesToday: zod.number(),
+  streamName: zod.string().nullish(),
 });
+
+/**
+ * @summary Get tutor/coaching listings
+ */
+export const GetTutorsQueryParams = zod.object({
+  city: zod.coerce.string().optional(),
+  subject: zod.coerce.string().optional(),
+});
+
+export const GetTutorsResponseItem = zod.object({
+  id: zod.number(),
+  teacherId: zod.number(),
+  teacherName: zod.string(),
+  subject: zod.string(),
+  description: zod.string().nullish(),
+  fees: zod.number(),
+  feesLabel: zod.string(),
+  city: zod.string(),
+  contactEmail: zod.string(),
+  contactPhone: zod.string().nullish(),
+  mode: zod.enum(["online", "offline", "both"]),
+  createdAt: zod.coerce.date(),
+});
+export const GetTutorsResponse = zod.array(GetTutorsResponseItem);
+
+/**
+ * @summary Create a tutor listing (teacher role only)
+ */
+export const CreateTutorListingBody = zod.object({
+  subject: zod.string(),
+  description: zod.string().optional(),
+  fees: zod.number(),
+  feesLabel: zod.string(),
+  city: zod.string(),
+  contactEmail: zod.string(),
+  contactPhone: zod.string().optional(),
+  mode: zod.enum(["online", "offline", "both"]),
+});
+
+/**
+ * @summary Delete own tutor listing
+ */
+export const DeleteTutorListingParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteTutorListingResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+/**
+ * @summary Get own tutor listings (teacher)
+ */
+export const GetMyTutorListingsResponseItem = zod.object({
+  id: zod.number(),
+  teacherId: zod.number(),
+  teacherName: zod.string(),
+  subject: zod.string(),
+  description: zod.string().nullish(),
+  fees: zod.number(),
+  feesLabel: zod.string(),
+  city: zod.string(),
+  contactEmail: zod.string(),
+  contactPhone: zod.string().nullish(),
+  mode: zod.enum(["online", "offline", "both"]),
+  createdAt: zod.coerce.date(),
+});
+export const GetMyTutorListingsResponse = zod.array(
+  GetMyTutorListingsResponseItem,
+);
+
+/**
+ * @summary Get internship/job listings
+ */
+export const GetInternshipsQueryParams = zod.object({
+  type: zod.enum(["internship", "part_time", "freelance"]).optional(),
+  location: zod.coerce.string().optional(),
+});
+
+export const GetInternshipsResponseItem = zod.object({
+  id: zod.number(),
+  employerId: zod.number(),
+  employerName: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  type: zod.enum(["internship", "part_time", "freelance"]),
+  payment: zod.number(),
+  paymentLabel: zod.string(),
+  location: zod.string(),
+  applyLink: zod.string().nullish(),
+  applyEmail: zod.string().nullish(),
+  skills: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const GetInternshipsResponse = zod.array(GetInternshipsResponseItem);
+
+/**
+ * @summary Create internship listing (employer role)
+ */
+export const CreateInternshipListingBody = zod.object({
+  title: zod.string(),
+  description: zod.string(),
+  type: zod.enum(["internship", "part_time", "freelance"]),
+  payment: zod.number(),
+  paymentLabel: zod.string(),
+  location: zod.string(),
+  applyLink: zod.string().optional(),
+  applyEmail: zod.string().optional(),
+  skills: zod.string().optional(),
+});
+
+/**
+ * @summary Delete own internship listing
+ */
+export const DeleteInternshipListingParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteInternshipListingResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+/**
+ * @summary Get own internship listings (employer)
+ */
+export const GetMyInternshipListingsResponseItem = zod.object({
+  id: zod.number(),
+  employerId: zod.number(),
+  employerName: zod.string(),
+  title: zod.string(),
+  description: zod.string(),
+  type: zod.enum(["internship", "part_time", "freelance"]),
+  payment: zod.number(),
+  paymentLabel: zod.string(),
+  location: zod.string(),
+  applyLink: zod.string().nullish(),
+  applyEmail: zod.string().nullish(),
+  skills: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const GetMyInternshipListingsResponse = zod.array(
+  GetMyInternshipListingsResponseItem,
+);
+
+/**
+ * @summary Get all available streams and their member counts
+ */
+export const GetStreamsResponseItem = zod.object({
+  stream: zod.string(),
+  memberCount: zod.number(),
+  isJoined: zod.boolean(),
+});
+export const GetStreamsResponse = zod.array(GetStreamsResponseItem);
+
+/**
+ * @summary Get members of a specific stream
+ */
+export const GetStreamMembersParams = zod.object({
+  stream: zod.coerce.string(),
+});
+
+export const GetStreamMembersResponseItem = zod.object({
+  userId: zod.number(),
+  name: zod.string(),
+  points: zod.number(),
+  streak: zod.number(),
+  tasksCompleted: zod.number(),
+  isCurrentUser: zod.boolean(),
+});
+export const GetStreamMembersResponse = zod.array(GetStreamMembersResponseItem);
+
+/**
+ * @summary Log a completed study session
+ */
+export const LogStudySessionBody = zod.object({
+  durationSeconds: zod.number(),
+  date: zod.coerce.date().optional(),
+});
+
+/**
+ * @summary Get today's study stats
+ */
+export const GetTodayStudyStatsResponse = zod.object({
+  totalSeconds: zod.number(),
+  totalMinutes: zod.number(),
+  goalMinutes: zod.number(),
+  goalReached: zod.boolean(),
+  sessionsCount: zod.number(),
+});
+
+/**
+ * @summary Get past 7 days study history
+ */
+export const GetStudyHistoryResponseItem = zod.object({
+  date: zod.string(),
+  totalMinutes: zod.number(),
+  sessionsCount: zod.number(),
+});
+export const GetStudyHistoryResponse = zod.array(GetStudyHistoryResponseItem);
