@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Uplift</title>
+</head>
+
+<body style="font-family: Arial; text-align: center;">
+
+<h1>Connect with Nearby Teachers, Study with Friends, Find Jobs & Complete Courses</h1>
+
+<p>A platform for students to grow, compete, and stay consistent.</p>
+
+<h2>Features</h2>
+<ul>
+  <li>📍 Find Nearby Teachers</li>
+  <li>👥 Study with Friends (Competition Mode)</li>
+  <li>💼 Internships & Work From Home Jobs</li>
+  <li>📊 Track Progress</li>
+</ul>
+
+<h2>Focus Mode</h2>
+<button onclick="startFocus()">Start Focus</button>
+<p id="timer"></p>
+
+<script>
+function startFocus() {
+  let time = 10;
+
+  let interval = setInterval(() => {
+    document.getElementById("timer").innerText = time;
+    time--;
+
+    if (time < 0) {
+      clearInterval(interval);
+      alert("Focus Complete! Points Added.");
+    }
+  }, 1000);
+}
+</script>
+
+</body>
+</html>
